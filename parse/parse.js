@@ -35,13 +35,7 @@ function AchaCampoHeaderPorTexto(Lista, text) {
 
 function OrdenaPorCPF(data) {
   let list = data;
-  // if (desc) {
-  //   list.sort((a, b) =>
-  //     a[0] < b[0] ? 1 : b[0] < a[0] ? -1 : 0
-  //   );
-  // } else {
   list.sort((a, b) => (a[0] > b[0] ? 1 : b[0] > a[0] ? -1 : 0));
-  // }
   return list;
 }
 

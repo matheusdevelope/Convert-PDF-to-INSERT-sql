@@ -5,12 +5,13 @@ function aspas(value) {
 }
 
 function GenerateInsert(LISTA, IDs) {
-  console.log(IDs);
-  fs.unlink("./output_file/insert.sql", (err) => {
-    console.log(err);
-  });
+  fs.unlink(IDs.output_file, (err) => null);
+  function AppendFile(data) {
+    fs.appendFileSync(IDs.output_file, data);
+  }
 
-  fs.appendFileSync("./output_file/insert.sql", "USE Recapadora \n GO \n\n ");
+  AppendFile(`USE ${IDs.BaseDeDados} \n GO \n\n `);
+
   LISTA.forEach((obj) => {
     let ValorComum = {
       ID: "Select next value for Geral.SequenciaID",
@@ -19,7 +20,7 @@ function GenerateInsert(LISTA, IDs) {
       CodTipoLancamento: IDs.CodTipoLancamento,
       CodFolha: IDs.CodFolha,
 
-      CodFuncionario: `(select Top 1 CodFuncionario from folhalite.Funcionario where CPF = '${obj[0]}')`,
+      CodFuncionario: `(select Top 1 CodFuncionario from ${IDs.TabelaFunc} where CPF = '${obj[0]}')`,
       Historico: aspas(obj[2]),
       NumeroDocumento: aspas(obj[0]), ///CPF do funcionario
       Valor: obj[1],
@@ -27,8 +28,8 @@ function GenerateInsert(LISTA, IDs) {
       Origem: aspas("Manual"),
       Cancelado: aspas("N"),
       GeraFinanceiro: aspas("N"),
-      NomeUsuario: aspas("Administrador"),
-      EstacaoTrabalho: aspas("Caixa"),
+      NomeUsuario: IDs.NomeUsuario,
+      EstacaoTrabalho: aspas(IDs.EstacaoTrabalho),
 
       CodContaFinanceira: null,
       CodNatureza: null,
@@ -42,7 +43,7 @@ function GenerateInsert(LISTA, IDs) {
       CodFolhaOrigem: 0,
     };
 
-    let lineInsert = "INSERT INTO FolhaLite.Lancamento (";
+    let lineInsert = `INSERT INTO ${IDs.TabelaLanc} (`;
     /////CAMPOS DO INSERT
     Object.keys(ValorComum).forEach((key) => {
       lineInsert += key + ", ";
@@ -56,9 +57,9 @@ function GenerateInsert(LISTA, IDs) {
     lineInsert = lineInsert.substring(0, lineInsert.length - 2);
     lineInsert += `);\n `;
     /////ANEXA A LINHA NO ARQUIVO
-    fs.appendFileSync("./output_file/insert.sql", lineInsert);
+    AppendFile(lineInsert);
   });
-  fs.appendFileSync("./output_file/insert.sql", "GO \n");
+  AppendFile("GO \n");
 }
 
 module.exports = GenerateInsert;
