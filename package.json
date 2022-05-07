@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
+  "scripts": {
+    "start": "node index.js"
+  },
   "dependencies": {
-    "file-dialog": "^0.0.8",
     "node-file-dialog": "^1.0.3",
     "pdf2json": "^2.0.1"
   }
