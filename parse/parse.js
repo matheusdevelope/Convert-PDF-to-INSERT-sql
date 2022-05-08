@@ -13,7 +13,7 @@ function ApenasNumero(valor) {
 }
 
 function AjustaObjetos(ListaObjs) {
-  let copy = ListaObjs;
+  let copy = [...ListaObjs];
   ListaObjs.forEach((obj, i) => {
     copy.splice(i, 1, {
       x: obj.x,
@@ -218,24 +218,37 @@ function GeraListaFuncionariosSalario(PDF) {
   // fs.writeFileSync("./output_file/listaSalario.json", JSON.stringify(Lista));
   return Lista;
 }
-
 function Parse(PDF_JSON, IDs) {
   //Loop para ler as paginas:
-  PDF_JSON.Pages.forEach((page) => {
-    if (IDs.Tipo === 1) {
+  let Tipo = IDs.Tipo;
+  for (let i = 0; i < PDF_JSON.Pages.length; i++) {
+    const page = PDF_JSON.Pages[i];
+
+    if (!Tipo) {
+      const TipoArquivo = AjustaObjetos(page.Texts).findIndex((obj) =>
+        obj.text.toLowerCase().includes("contribui")
+      );
+      if (TipoArquivo > 1) {
+        Tipo = 1;
+      } else {
+        Tipo = 2;
+      }
+    }
+    if (Tipo == 1) {
       GenerateInsert(
         GeraListaFuncionariosSalario(AjustaObjetos(page.Texts)),
         IDs
       );
-    } else if (IDs.Tipo === 2) {
+    } else if (Tipo == 2) {
       GenerateInsert(
         GeraListaFuncionariosExtras(AjustaObjetos(page.Texts)),
         IDs
       );
     } else {
-      console.log("Tipo de Lançamento Inválido");
+      return false;
     }
-  });
+  }
+  return true;
 }
 
 module.exports = Parse;
