@@ -1,4 +1,3 @@
-const fs = require("fs");
 const GenerateInsert = require("./insert");
 
 function ApenasNumero(valor) {

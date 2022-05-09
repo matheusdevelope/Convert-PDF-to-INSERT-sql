@@ -5,8 +5,6 @@ function aspas(value) {
 }
 
 function GenerateInsert(LISTA, IDs) {
-  // console.log(LISTA);
-  // fs.unlink(IDs.output_file, (err) => null);
   function AppendFile(data) {
     fs.appendFileSync(IDs.output_file, data);
   }

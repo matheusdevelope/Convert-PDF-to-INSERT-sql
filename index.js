@@ -1,13 +1,10 @@
 const fs = require("fs");
 const { hostname } = require("os");
-const dialog = require("node-file-dialog");
 const PDFParser = require("pdf2json");
 const Parse = require("./parse/parse");
 const getParamsTerminal = require("./parse/inputCMD");
-const { exec, execSync } = require("child_process");
-const { resolve, normalize } = require("path");
-const { exit } = require("process");
-const path = require("path");
+const { exec } = require("child_process");
+const { join, resolve, normalize } = require("path");
 const pdfParser = new PDFParser();
 
 const Params = getParamsTerminal();
@@ -110,7 +107,7 @@ pdfParser.on("pdfParser_dataReady", (pdfData) => {
 });
 
 if (Params) {
-  exec(path.join(Params.path_dialog + " -o"), (error, stdout, stderr) => {
+  exec(join(Params.path_dialog + " -o"), (error, stdout, stderr) => {
     if (stdout) {
       if (stdout.trim() === "None") console.log(new Error("Nothing selected"));
       else {

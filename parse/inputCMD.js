@@ -39,28 +39,28 @@ function log(params, p2) {
 
 function getParamsTerminal() {
   const input = process.argv.splice(2);
-  //log(input);
   const AcceptParams = [
-    {
-      param: "--path_dialog",
-      defaultValue: "C:\\Data7\\bin\\dialog.exe",
-      model: "[C:\\Data7\\bin\\dialog.exe] ",
-      required: false,
-      description: "Caminho do excutável de selecção do arquivo.",
-    },
-    {
-      param: "--db",
-      defaultValue: "Data7",
-      model: "[NomeDaBaseDeDados] ",
-      required: false,
-      description: "Nome da base de dados",
-    },
     {
       param: "--help",
       defaultValue: ".",
       model: "[]",
       required: false,
       description: "Exibe ajuda para uso",
+    },
+    {
+      param: "--path_dialog",
+      defaultValue: "C:\\Data7\\ImportarPDF\\bin\\dialog.exe",
+      model: "[C:\\Data7\\ImportarPDF\\bin\\dialog.exe] ",
+      required: false,
+      description: "Caminho do excutável de selecção do arquivo.",
+    },
+
+    {
+      param: "--output_file",
+      defaultValue: "C:\\Data7\\ImportarPDF\\temp",
+      model: "[C:\\Data7\\ImportarPDF\\temp] ",
+      required: false,
+      description: "Pasta de destino do arquivo de insert gerado.",
     },
     {
       param: "--tabela_config",
@@ -70,21 +70,7 @@ function getParamsTerminal() {
       description:
         "Gera arquivo com as alterações necessárias no banco de dados para que o projeto possa funcionar como o esperado.",
     },
-    {
-      param: "--servidor",
-      defaultValue: "localhost\\data7",
-      model: "[localhost\\data7] ",
-      required: false,
-      description: "Servidor da base de dados.",
-    },
 
-    {
-      param: "--output_file",
-      defaultValue: "C:\\Data7\\temp",
-      model: "[C:\\Data7\\temp] ",
-      required: false,
-      description: "Pasta de destino do arquivo de insert gerado.",
-    },
     {
       param: "--json",
       defaultValue: false,
@@ -93,6 +79,7 @@ function getParamsTerminal() {
       description:
         "Use esse parametro para ter acesso ao dados antes da conversão parar INSERT.sql",
     },
+
     {
       param: "--executeinsertonly",
       defaultValue: false,
@@ -100,15 +87,6 @@ function getParamsTerminal() {
       required: false,
       description:
         "Use esse parametro para fazer o INSERT.sql após conferência.",
-    },
-
-    {
-      param: "--tipo",
-      defaultValue: false,
-      model: "[1] -Salario / [2] -Horas extras ",
-      required: false,
-      description:
-        "Caso não informado o sistema tentará identificar o tipo de lançamento automaticamente.\n Use esse paremetro caso queira deixar explicito que to tipo de lançamento.",
     },
     {
       param: "--acao",
@@ -118,6 +96,30 @@ function getParamsTerminal() {
       description:
         "Caso a Acao seja [1] o sistema fará o insert direto no banco de dados, caso [2], o arquivo será aberto para conferencia e execução manual.",
     },
+    {
+      param: "--tipo",
+      defaultValue: false,
+      model: "[1] -Salario / [2] -Horas extras ",
+      required: false,
+      description:
+        "Caso não informado o sistema tentará identificar o tipo de lançamento automaticamente.\n Use esse paremetro caso queira deixar explicito que to tipo de lançamento.",
+    },
+
+    {
+      param: "--servidor",
+      defaultValue: "localhost\\data7",
+      model: "[localhost\\data7] ",
+      required: false,
+      description: "Servidor da base de dados.",
+    },
+    {
+      param: "--db",
+      defaultValue: "Data7",
+      model: "[NomeDaBaseDeDados] ",
+      required: false,
+      description: "Nome da base de dados",
+    },
+
     {
       param: "--tabelaLanc",
       defaultValue: "FolhaLite.Lancamento",
@@ -138,7 +140,7 @@ function getParamsTerminal() {
   let ParamsInput = {};
   let Errors = [];
 
-  if (input.toString().toLowerCase().includes("--help")) {
+  if (input.toString().toLowerCase().includes("--help") || input.length === 0) {
     Help();
     return false;
   }
@@ -158,7 +160,7 @@ function getParamsTerminal() {
       log(obj.param + " " + obj.model);
       log("Descrição: ", obj.description);
       log("Valor padrão: ", obj.defaultValue);
-      log("Obrigatório: ", obj.required);
+      log("Obrigatório: ", obj.required.toString());
       log("-----------------------------");
     });
     log("\n");
