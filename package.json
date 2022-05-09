@@ -1,5 +1,5 @@
 {
-  "name": "PDF",
+  "name": "ImportPDF",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
@@ -15,7 +15,6 @@
     "outputPath": "dist"
   },
   "dependencies": {
-    "node-file-dialog": "^1.0.3",
     "pdf2json": "^2.0.1",
     "pkg": "^5.6.0"
   },

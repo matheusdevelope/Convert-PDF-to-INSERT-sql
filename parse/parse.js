@@ -235,15 +235,13 @@ function Parse(PDF_JSON, IDs) {
       }
     }
     if (Tipo == 1) {
-      GenerateInsert(
-        GeraListaFuncionariosSalario(AjustaObjetos(page.Texts)),
-        IDs
-      );
+      const Lista = GeraListaFuncionariosSalario(AjustaObjetos(page.Texts));
+      GenerateInsert(Lista, IDs);
+      return Lista;
     } else if (Tipo == 2) {
-      GenerateInsert(
-        GeraListaFuncionariosExtras(AjustaObjetos(page.Texts)),
-        IDs
-      );
+      const Lista = GeraListaFuncionariosExtras(AjustaObjetos(page.Texts));
+      GenerateInsert(Lista, IDs);
+      return Lista;
     } else {
       return false;
     }

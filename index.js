@@ -4,7 +4,7 @@ const dialog = require("node-file-dialog");
 const PDFParser = require("pdf2json");
 const Parse = require("./parse/parse");
 const getParamsTerminal = require("./parse/inputCMD");
-const { exec } = require("child_process");
+const { exec, execSync } = require("child_process");
 const { resolve, normalize } = require("path");
 const { exit } = require("process");
 const path = require("path");
@@ -23,6 +23,36 @@ function HashUnique(size) {
   return uuid;
 }
 
+function InsertON_DB(path) {
+  exec(
+    "sqlcmd -S " + normalize(Params.servidor) + " -i " + path,
+    (err, stdout, stderr) => {
+      fs.appendFileSync(
+        path.substring(0, path.length - 4) + "-ERROR.txt",
+        "\n\n\nData >>  " + new Date() + "\n\n"
+      );
+      fs.appendFileSync(
+        path.substring(0, path.length - 4) + "-ERROR.txt",
+        "Erro>> " + err + "\n\n"
+      );
+      fs.appendFileSync(
+        path.substring(0, path.length - 4) + "-ERROR.txt",
+        "Stdout>> " + stdout + "\n\n"
+      );
+      fs.appendFileSync(
+        path.substring(0, path.length - 4) + "-ERROR.txt",
+        "Stderr>> " + stderr || "Nenhum" + "\n\n"
+      );
+      stdout.includes("Cannot") &&
+        exec(
+          "explorer.exe /select, " +
+            path.substring(0, path.length - 4) +
+            "-ERROR.txt",
+          (ret) => null
+        );
+    }
+  );
+}
 pdfParser.on("pdfParser_dataError", (errData) =>
   console.error(errData.parserError)
 );
@@ -32,7 +62,7 @@ pdfParser.on("pdfParser_dataReady", (pdfData) => {
     return `(select ${Campo} from Customizado_Dados_Folha_Importacao
     WHERE Atual = 'S')`;
   }
-  const path = resolve(
+  let path = resolve(
     Params.output_file,
     "insert-" +
       HashUnique(5) +
@@ -40,6 +70,7 @@ pdfParser.on("pdfParser_dataReady", (pdfData) => {
       new Date().toLocaleDateString().replace(/[\/"]/g, "-") +
       ".sql"
   );
+  path = normalize(path);
   const IDs = {
     CodEmpresa: SelectPadrao("CodEmpresa"),
     CodFilial: SelectPadrao("CodFilial"),
@@ -58,54 +89,43 @@ pdfParser.on("pdfParser_dataReady", (pdfData) => {
   const retorno = Parse(pdfData, IDs);
   if (!retorno) return console.log("Houve um erro!");
 
+  if (Number(Params.json) === 1) {
+    if (retorno.length > 1) {
+      retorno.forEach((obj) => {
+        fs.appendFileSync(
+          path.substring(0, path.length - 4) + "-JSON.txt",
+          obj.toString().replaceAll(",", " , ") + "\n\n"
+        );
+      });
+    }
+  }
+
   if (Number(Params.acao) == 2) {
     exec("explorer.exe /select, " + path, (ret) => null);
     return;
   }
 
-  exec("sqlcmd -S " + Params.servidor + " -i " + path, (err) => {
-    console.log(err);
-  });
-
+  InsertON_DB(path);
   console.log("Finalizado!");
-  exit();
 });
 
 if (Params) {
-  exec(path.join("C:\\Data7\\bin\\dialog.exe -o"), (error, stdout, stderr) => {
+  exec(path.join(Params.path_dialog + " -o"), (error, stdout, stderr) => {
     if (stdout) {
       if (stdout.trim() === "None") console.log(new Error("Nothing selected"));
       else {
-        // console.log(stdout.trim().split("\n")[0]);
-        pdfParser
-          .loadPDF(stdout.trim().split("\n")[0])
-          .catch((o) => console.log("erro:", o));
+        if (Params.executeinsertonly) {
+          InsertON_DB(normalize(stdout.trim().split("\n")[0]));
+        } else {
+          pdfParser
+            .loadPDF(stdout.trim().split("\n")[0])
+            .catch((o) => console.log("erro:", o));
+        }
       }
-      // resolve(stdout.trim().split('\n'))
     } else if (error) {
       console.log(new Error(error));
     } else if (stderr) {
       console.log(new Error(stderr));
     }
   });
-
-  // exec(resolve("C:\\Data7\\dialog.exe -o"), (a, b, c) => {
-  //   console.log("A:", a);
-  //   console.log("B:", b);
-  //   console.log("C:", c);
-  //   console.log("B:", b.replace(/[\/"]/g, "\\"));
-  //   // exec(b, (e) => {
-  //   //   console.log(e);
-  //   // });
-  //   const path = b;
-  //   console.log(fs.statSync(path).mtimeMs);
-  //   console.log("foi");
-  //   //   pdfParser.loadPDF(path).catch((o) => console.log("erro:", o));
-  // });
-
-  // dialog({ type: "open-file" })
-  //   .then((dir) => {
-  //    // pdfParser.loadPDF(dir[0]);
-  //   })
-  //   .catch((err) => console.log("Processo Cancelado!"));
 }

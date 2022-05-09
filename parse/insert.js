@@ -21,7 +21,7 @@ function GenerateInsert(LISTA, IDs) {
       CodTipoLancamento: IDs.CodTipoLancamento,
       CodFolha: IDs.CodFolha,
 
-      CodFuncionario: `(select Top 1 CodFuncionario from ${IDs.TabelaFunc} where CPF = '${obj[0]}')`,
+      CodFuncionario: `(select Top 1 CodFuncionario from ${IDs.TabelaFunc} where CPF = '${obj[0]}' and Ativo = 'S')`,
       Historico: aspas(obj[2]),
       NumeroDocumento: aspas(obj[0]), ///CPF do funcionario
       Valor: obj[1],
@@ -29,7 +29,7 @@ function GenerateInsert(LISTA, IDs) {
       Origem: aspas("Manual"),
       Cancelado: aspas("N"),
       GeraFinanceiro: aspas("N"),
-      NomeUsuario: IDs.NomeUsuario,
+      NomeUsuario: aspas(IDs.NomeUsuario),
       EstacaoTrabalho: aspas(IDs.EstacaoTrabalho),
 
       CodContaFinanceira: null,

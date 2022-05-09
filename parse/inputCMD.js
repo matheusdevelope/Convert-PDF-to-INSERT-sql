@@ -9,9 +9,6 @@ CREATE TABLE Customizado_Dados_Folha_Importacao (
   CodFolha int,
   CodTipoLancamento int,
   Tipo int,
-  BaseDeDados varchar(20),
-  TabelaFuncionario varchar(20),
-  Tabelalancamento varchar(20),
   Atual varchar(1),
   DataCriacao date
   )
@@ -35,44 +32,6 @@ CREATE TABLE Customizado_Dados_Folha_Importacao (
   end
   
 `;
-const numCPUs = require("os").cpus().length;
-function getTerminalInput(subArrays) {
-  return new Promise((resolve, reject) => {
-    const output = [];
-    if (process.stdin.isTTY) {
-      const input = process.argv.slice(2);
-      console.log("input:", input);
-
-      const len = Math.min(subArrays, Math.ceil(input.length / subArrays));
-
-      while (input.length) {
-        output.push(input.splice(0, len));
-      }
-
-      resolve(output);
-    } else {
-      let input = "";
-      process.stdin.setEncoding("utf-8");
-
-      process.stdin.on("readable", () => {
-        let chunk;
-        while ((chunk = process.stdin.read())) input += chunk;
-      });
-
-      process.stdin.on("end", () => {
-        input = input.trim().split("\n");
-
-        const len = Math.min(input.length, Math.ceil(input.length / subArrays));
-
-        while (input.length) {
-          output.push(input.splice(0, len));
-        }
-
-        resolve(output);
-      });
-    }
-  });
-}
 
 function log(params, p2) {
   console.log(params, p2 || "");
@@ -80,8 +39,15 @@ function log(params, p2) {
 
 function getParamsTerminal() {
   const input = process.argv.splice(2);
-  log(input);
+  //log(input);
   const AcceptParams = [
+    {
+      param: "--path_dialog",
+      defaultValue: "C:\\Data7\\bin\\dialog.exe",
+      model: "[C:\\Data7\\bin\\dialog.exe] ",
+      required: false,
+      description: "Caminho do excutável de selecção do arquivo.",
+    },
     {
       param: "--db",
       defaultValue: "Data7",
@@ -91,8 +57,8 @@ function getParamsTerminal() {
     },
     {
       param: "--help",
-      defaultValue: "C:\\Data7\\temp",
-      model: "[C:\\Data7\\temp] ",
+      defaultValue: ".",
+      model: "[]",
       required: false,
       description: "Exibe ajuda para uso",
     },
@@ -119,6 +85,23 @@ function getParamsTerminal() {
       required: false,
       description: "Pasta de destino do arquivo de insert gerado.",
     },
+    {
+      param: "--json",
+      defaultValue: false,
+      model: "[1]",
+      required: false,
+      description:
+        "Use esse parametro para ter acesso ao dados antes da conversão parar INSERT.sql",
+    },
+    {
+      param: "--executeinsertonly",
+      defaultValue: false,
+      model: "[y]",
+      required: false,
+      description:
+        "Use esse parametro para fazer o INSERT.sql após conferência.",
+    },
+
     {
       param: "--tipo",
       defaultValue: false,
