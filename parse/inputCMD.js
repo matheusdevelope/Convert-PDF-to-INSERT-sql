@@ -2,19 +2,37 @@ const { exec } = require("child_process");
 const { writeFileSync } = require("fs");
 const { resolve } = require("path");
 const CREATE_SQL_SCRIPT = `
+-->> CREATE TABELA DE CONFIGUR^ÇÂO PARA IMPORTAÇÃO
 CREATE TABLE Customizado_Dados_Folha_Importacao (
   ID varchar PRIMARY KEY,
   CodEmpresa int, 
   CodFilial int ,
   CodFolha int,
   CodTipoLancamento int,
-  Tipo int,
   Atual varchar(1),
   DataCriacao date
   )
+
+  GO
+  -->>INSERT INICIAL PADRÃO
+  INSERT INTO Customizado_Dados_Folha_Importacao
+           (ID,
+            CodEmpresa,
+            CodFilial,
+            CodFolha,
+            CodTipoLancamento,
+            Atual,
+            DataCriacao)
+    VALUES (1,
+            1,
+            1,
+            1,
+            1,
+            'S',
+            GETDATE())
+  GO
   
-  
-  
+  -->>> TRIGGER PRA SEMPRE MANTER APENAS UMA CONFIGURAÇÃO PADRÃO
   CREATE TRIGGER [dbo].tgr_ConfigAtual 
   ON [dbo].Customizado_Dados_Folha_Importacao
   for insert, update
@@ -31,6 +49,34 @@ CREATE TABLE Customizado_Dados_Folha_Importacao (
     END
   end
   
+  -->>>>>>>>>>CREATE TABLE
+  INSERT INTO tabela (CodTabela, CodCampoAutoIncremento, CodCampoEstrutura, ControlaPorEmpresa, CodGrupoTabela, Proprietario, CodDBSpaceTabela, CodDBSpaceIndice, Observacao, UtilizaGradeZebrada, MargemEditor, ConfirmaInclusao, ConfirmaAlteracao, DesabilitaExclusao, DesabilitaVisualizacao, DesabilitaInclusao, DesabilitaAlteracao, ExibirDentroQuadroRolagem, AlturaQuadroRolagem, EditaNaGrade, CodTabelaEdicao, CodPastaTabelaEdicao, DllFormEdicao, Nome, Titulo, CodCampoLegenda1, CodCampoLegenda2, CodTabelaPropriedadeCampo, CodCampoPreferenciaPesquisa, TodosRegistrosNoInicio, PermiteMultiplaSelecaoNaGrade, UsarCacheDeObjeto, CodCampoOrdemPadrao, OrdemCampoOrdemPadrao, InclusaoRecursiva, Descricao, LogProcessosAtivo, LogInclusaoAtivo, LogExclusaoAtivo, LogAlteracaoAtivo, FiltroFixoGrade, ModeloLayout, CodRelatorioInclusao, ValidacaoInclusao, ValidacaoAlteracao, ValidacaoExclusao, ValidacaoVisualizacao, NomeSchema, ArquivoProjetoApoio)
+      VALUES ((SELECT MAX(CODTABELA) + 1 FROM TABELA  ), 1, null, null, 1, null, null, null, null, null, null, 'N', 'N', 'N', 'N', 'N', 'N', 'N', 0, 'N', null, null, '', 'Customizado_Dados_Folha_Importacao', 'Configuração Folha - PDF', null, null, null, 0, null, 'N', 'N', 7, 'D', 'N', null, null, null, null, null, '', '2', 0, '', '', '', '', '', null);
+ 
+ GO
+
+ -->>>>>>>>>>CONFIGURA CAMPOS DA TABELA
+  INSERT INTO campo (CodTabela, CodCampo, Tipo, CondicaoObrigatorio, CondicaoVisivelGrade, Titulo, TituloGrade, TituloRelatorio, TituloPesquisa, TituloEdicao, Tamanho, CasasDecimal, CondicaoVisivelEdicao, OrdemEdicao, OrdemGrade, MascaraEdicao, MascaraGrade, Contexto, CodPasta, FormulaValorPadrao, ListaOpcao, CondicaoEditarInclusao, CondicaoEditarAlteracao, CodPesquisaPadrao, OrdemPesquisa, CondicaoVisivelPesquisa, ValidacaoUsuario, CodMensagemValidacaoUsuario, ValidacaoSistema, CodMensagemValidacaoSistema, proprietario, observacao, LarguraGrade, LarguraEdicao, LarguraPesquisa, PosicaoX, PosicaoY, AlturaEdicao, FormulaCalculoValor, ScriptOnExit, Chave, TipoPesquisa, VisivelRelatorio, VisivelParametroRelatorio, TituloInicialParametroRelatorio, TituloFinalParametroRelatorio, ExibirResumo, Nome, ExibirNoRodapePesquisa, ExibirNoRodapeGrade, Caractere, TipoCaractere, CharCase, ScriptOnEnter, AlinhamentoEdicao, NomeFonteEdicao, TamanhoFonteEdicao, CorFonteEdicao, FonteNegritoEdicao, FonteItalicoEdicao, FonteSublinhadoEdicao, FonteRiscadoEdicao, CondicaoPadrao, PesquisaIncremental, Coluna, TipoValorPadrao, ManterConteudo, CondicaoPesquisaEspecifica)
+      VALUES ((SELECT MAX(CODTABELA)  FROM TABELA  ), 1, 'V', 'False', 'S', 'ID', '', null, '', '', 1, 0, 'S', 1, 1, null, '', 'R', null, '', '', 'False', 'False', null, 1, 'S', '', null, '', null, 'U', 'Esse campo foi criado pela sincronização, configure suas devidas propriedades corretamente.', null, null, null, null, null, null, '', null, 'S', null, null, null, null, null, null, 'ID', 'N', 'N', '', 'V', 'P', null, null, '', null, 0, 'N', 'N', 'N', null, 0, 'N', 0, 'Nenhum', 'Nao', '');
+
+ INSERT INTO campo (CodTabela, CodCampo, Tipo, CondicaoObrigatorio, CondicaoVisivelGrade, Titulo, TituloGrade, TituloRelatorio, TituloPesquisa, TituloEdicao, Tamanho, CasasDecimal, CondicaoVisivelEdicao, OrdemEdicao, OrdemGrade, MascaraEdicao, MascaraGrade, Contexto, CodPasta, FormulaValorPadrao, ListaOpcao, CondicaoEditarInclusao, CondicaoEditarAlteracao, CodPesquisaPadrao, OrdemPesquisa, CondicaoVisivelPesquisa, ValidacaoUsuario, CodMensagemValidacaoUsuario, ValidacaoSistema, CodMensagemValidacaoSistema, proprietario, observacao, LarguraGrade, LarguraEdicao, LarguraPesquisa, PosicaoX, PosicaoY, AlturaEdicao, FormulaCalculoValor, ScriptOnExit, Chave, TipoPesquisa, VisivelRelatorio, VisivelParametroRelatorio, TituloInicialParametroRelatorio, TituloFinalParametroRelatorio, ExibirResumo, Nome, ExibirNoRodapePesquisa, ExibirNoRodapeGrade, Caractere, TipoCaractere, CharCase, ScriptOnEnter, AlinhamentoEdicao, NomeFonteEdicao, TamanhoFonteEdicao, CorFonteEdicao, FonteNegritoEdicao, FonteItalicoEdicao, FonteSublinhadoEdicao, FonteRiscadoEdicao, CondicaoPadrao, PesquisaIncremental, Coluna, TipoValorPadrao, ManterConteudo, CondicaoPesquisaEspecifica)
+      VALUES ((SELECT MAX(CODTABELA)  FROM TABELA  ), 2, 'I', 'False', 'S', 'Empresa', '', null, '', '', 8, 0, 'S', 2, 2, null, '', 'R', null, '1', '', 'True', 'True', 227, 2, 'S', '', null, '', null, 'U', 'Esse campo foi criado pela sincronização, configure suas devidas propriedades corretamente.', null, null, null, null, null, null, '', null, 'N', 'P', null, null, null, null, null, 'CodEmpresa', 'N', 'N', '', 'V', 'P', null, null, '', null, 0, 'N', 'N', 'N', null, 0, 'N', 0, 'Formula', 'Nao', '');
+
+ INSERT INTO campo (CodTabela, CodCampo, Tipo, CondicaoObrigatorio, CondicaoVisivelGrade, Titulo, TituloGrade, TituloRelatorio, TituloPesquisa, TituloEdicao, Tamanho, CasasDecimal, CondicaoVisivelEdicao, OrdemEdicao, OrdemGrade, MascaraEdicao, MascaraGrade, Contexto, CodPasta, FormulaValorPadrao, ListaOpcao, CondicaoEditarInclusao, CondicaoEditarAlteracao, CodPesquisaPadrao, OrdemPesquisa, CondicaoVisivelPesquisa, ValidacaoUsuario, CodMensagemValidacaoUsuario, ValidacaoSistema, CodMensagemValidacaoSistema, proprietario, observacao, LarguraGrade, LarguraEdicao, LarguraPesquisa, PosicaoX, PosicaoY, AlturaEdicao, FormulaCalculoValor, ScriptOnExit, Chave, TipoPesquisa, VisivelRelatorio, VisivelParametroRelatorio, TituloInicialParametroRelatorio, TituloFinalParametroRelatorio, ExibirResumo, Nome, ExibirNoRodapePesquisa, ExibirNoRodapeGrade, Caractere, TipoCaractere, CharCase, ScriptOnEnter, AlinhamentoEdicao, NomeFonteEdicao, TamanhoFonteEdicao, CorFonteEdicao, FonteNegritoEdicao, FonteItalicoEdicao, FonteSublinhadoEdicao, FonteRiscadoEdicao, CondicaoPadrao, PesquisaIncremental, Coluna, TipoValorPadrao, ManterConteudo, CondicaoPesquisaEspecifica)
+      VALUES ((SELECT MAX(CODTABELA)  FROM TABELA  ), 3, 'I', 'False', 'S', 'Filial', '', null, '', '', 8, 0, 'S', 3, 3, null, '', 'R', null, '1', '', 'True', 'True', 287, 3, 'S', '', null, '', null, 'U', 'Esse campo foi criado pela sincronização, configure suas devidas propriedades corretamente.', null, null, null, null, null, null, '', null, 'N', 'P', null, null, null, null, null, 'CodFilial', 'N', 'N', '', 'V', 'P', null, null, '', null, 0, 'N', 'N', 'N', null, 0, 'N', 0, 'Formula', 'Nao', '');
+
+ INSERT INTO campo (CodTabela, CodCampo, Tipo, CondicaoObrigatorio, CondicaoVisivelGrade, Titulo, TituloGrade, TituloRelatorio, TituloPesquisa, TituloEdicao, Tamanho, CasasDecimal, CondicaoVisivelEdicao, OrdemEdicao, OrdemGrade, MascaraEdicao, MascaraGrade, Contexto, CodPasta, FormulaValorPadrao, ListaOpcao, CondicaoEditarInclusao, CondicaoEditarAlteracao, CodPesquisaPadrao, OrdemPesquisa, CondicaoVisivelPesquisa, ValidacaoUsuario, CodMensagemValidacaoUsuario, ValidacaoSistema, CodMensagemValidacaoSistema, proprietario, observacao, LarguraGrade, LarguraEdicao, LarguraPesquisa, PosicaoX, PosicaoY, AlturaEdicao, FormulaCalculoValor, ScriptOnExit, Chave, TipoPesquisa, VisivelRelatorio, VisivelParametroRelatorio, TituloInicialParametroRelatorio, TituloFinalParametroRelatorio, ExibirResumo, Nome, ExibirNoRodapePesquisa, ExibirNoRodapeGrade, Caractere, TipoCaractere, CharCase, ScriptOnEnter, AlinhamentoEdicao, NomeFonteEdicao, TamanhoFonteEdicao, CorFonteEdicao, FonteNegritoEdicao, FonteItalicoEdicao, FonteSublinhadoEdicao, FonteRiscadoEdicao, CondicaoPadrao, PesquisaIncremental, Coluna, TipoValorPadrao, ManterConteudo, CondicaoPesquisaEspecifica)
+      VALUES ((SELECT MAX(CODTABELA)  FROM TABELA  ), 4, 'I', 'False', 'S', 'Folha', '', null, '', '', 8, 0, 'S', 4, 4, null, '', 'R', null, '', '', 'True', 'True', 342, 4, 'S', '', null, '', null, 'U', 'Esse campo foi criado pela sincronização, configure suas devidas propriedades corretamente.', null, null, null, null, null, null, '', null, 'N', 'P', null, null, null, null, null, 'CodFolha', 'N', 'N', '', 'V', 'P', null, null, '', null, 0, 'N', 'N', 'N', null, 0, 'N', 0, 'Nenhum', 'Nao', '');
+
+ INSERT INTO campo (CodTabela, CodCampo, Tipo, CondicaoObrigatorio, CondicaoVisivelGrade, Titulo, TituloGrade, TituloRelatorio, TituloPesquisa, TituloEdicao, Tamanho, CasasDecimal, CondicaoVisivelEdicao, OrdemEdicao, OrdemGrade, MascaraEdicao, MascaraGrade, Contexto, CodPasta, FormulaValorPadrao, ListaOpcao, CondicaoEditarInclusao, CondicaoEditarAlteracao, CodPesquisaPadrao, OrdemPesquisa, CondicaoVisivelPesquisa, ValidacaoUsuario, CodMensagemValidacaoUsuario, ValidacaoSistema, CodMensagemValidacaoSistema, proprietario, observacao, LarguraGrade, LarguraEdicao, LarguraPesquisa, PosicaoX, PosicaoY, AlturaEdicao, FormulaCalculoValor, ScriptOnExit, Chave, TipoPesquisa, VisivelRelatorio, VisivelParametroRelatorio, TituloInicialParametroRelatorio, TituloFinalParametroRelatorio, ExibirResumo, Nome, ExibirNoRodapePesquisa, ExibirNoRodapeGrade, Caractere, TipoCaractere, CharCase, ScriptOnEnter, AlinhamentoEdicao, NomeFonteEdicao, TamanhoFonteEdicao, CorFonteEdicao, FonteNegritoEdicao, FonteItalicoEdicao, FonteSublinhadoEdicao, FonteRiscadoEdicao, CondicaoPadrao, PesquisaIncremental, Coluna, TipoValorPadrao, ManterConteudo, CondicaoPesquisaEspecifica)
+      VALUES ((SELECT MAX(CODTABELA)  FROM TABELA  ), 5, 'I', 'False', 'S', 'Tipo de Evento Folha', '', null, '', '', 8, 0, 'S', 5, 5, null, '', 'R', null, '', '', 'True', 'True', 335, 5, 'S', '', null, '', null, 'U', 'Esse campo foi criado pela sincronização, configure suas devidas propriedades corretamente.', null, null, null, null, null, null, '', null, 'N', 'P', null, null, null, null, null, 'CodTipoLancamento', 'N', 'N', '', 'V', 'P', null, null, '', null, 0, 'N', 'N', 'N', null, 0, 'N', 0, 'Nenhum', 'Nao', '');
+
+ INSERT INTO campo (CodTabela, CodCampo, Tipo, CondicaoObrigatorio, CondicaoVisivelGrade, Titulo, TituloGrade, TituloRelatorio, TituloPesquisa, TituloEdicao, Tamanho, CasasDecimal, CondicaoVisivelEdicao, OrdemEdicao, OrdemGrade, MascaraEdicao, MascaraGrade, Contexto, CodPasta, FormulaValorPadrao, ListaOpcao, CondicaoEditarInclusao, CondicaoEditarAlteracao, CodPesquisaPadrao, OrdemPesquisa, CondicaoVisivelPesquisa, ValidacaoUsuario, CodMensagemValidacaoUsuario, ValidacaoSistema, CodMensagemValidacaoSistema, proprietario, observacao, LarguraGrade, LarguraEdicao, LarguraPesquisa, PosicaoX, PosicaoY, AlturaEdicao, FormulaCalculoValor, ScriptOnExit, Chave, TipoPesquisa, VisivelRelatorio, VisivelParametroRelatorio, TituloInicialParametroRelatorio, TituloFinalParametroRelatorio, ExibirResumo, Nome, ExibirNoRodapePesquisa, ExibirNoRodapeGrade, Caractere, TipoCaractere, CharCase, ScriptOnEnter, AlinhamentoEdicao, NomeFonteEdicao, TamanhoFonteEdicao, CorFonteEdicao, FonteNegritoEdicao, FonteItalicoEdicao, FonteSublinhadoEdicao, FonteRiscadoEdicao, CondicaoPadrao, PesquisaIncremental, Coluna, TipoValorPadrao, ManterConteudo, CondicaoPesquisaEspecifica)
+      VALUES ((SELECT MAX(CODTABELA)  FROM TABELA  ), 7, 'V', 'False', 'S', 'Config Padrão', '', null, '', '', 1, 0, 'S', 7, 7, null, '', 'R', null, '''S''', 'Sim=S;Não=N', 'True', 'True', null, 7, 'S', '', null, '', null, 'U', 'Esse campo foi criado pela sincronização, configure suas devidas propriedades corretamente.', null, null, null, null, null, null, '', null, 'N', null, null, null, null, null, null, 'Atual', 'N', 'N', '', 'V', 'P', null, null, '', null, 0, 'N', 'N', 'N', null, 0, 'N', 0, 'Formula', 'Nao', '');
+
+ INSERT INTO campo (CodTabela, CodCampo, Tipo, CondicaoObrigatorio, CondicaoVisivelGrade, Titulo, TituloGrade, TituloRelatorio, TituloPesquisa, TituloEdicao, Tamanho, CasasDecimal, CondicaoVisivelEdicao, OrdemEdicao, OrdemGrade, MascaraEdicao, MascaraGrade, Contexto, CodPasta, FormulaValorPadrao, ListaOpcao, CondicaoEditarInclusao, CondicaoEditarAlteracao, CodPesquisaPadrao, OrdemPesquisa, CondicaoVisivelPesquisa, ValidacaoUsuario, CodMensagemValidacaoUsuario, ValidacaoSistema, CodMensagemValidacaoSistema, proprietario, observacao, LarguraGrade, LarguraEdicao, LarguraPesquisa, PosicaoX, PosicaoY, AlturaEdicao, FormulaCalculoValor, ScriptOnExit, Chave, TipoPesquisa, VisivelRelatorio, VisivelParametroRelatorio, TituloInicialParametroRelatorio, TituloFinalParametroRelatorio, ExibirResumo, Nome, ExibirNoRodapePesquisa, ExibirNoRodapeGrade, Caractere, TipoCaractere, CharCase, ScriptOnEnter, AlinhamentoEdicao, NomeFonteEdicao, TamanhoFonteEdicao, CorFonteEdicao, FonteNegritoEdicao, FonteItalicoEdicao, FonteSublinhadoEdicao, FonteRiscadoEdicao, CondicaoPadrao, PesquisaIncremental, Coluna, TipoValorPadrao, ManterConteudo, CondicaoPesquisaEspecifica)
+      VALUES ((SELECT MAX(CODTABELA)  FROM TABELA  ), 8, 'D', 'False', 'S', 'Data Inclusão Config', '', null, '', '', 10, 0, 'S', 8, 8, null, '', 'R', null, 'dbo.DataAtual()', '', 'False', 'False', null, 8, 'S', '', null, '', null, 'U', 'Esse campo foi criado pela sincronização, configure suas devidas propriedades corretamente.', null, null, null, null, null, null, '', null, 'N', null, null, null, null, null, null, 'DataCriacao', 'N', 'N', '', 'V', 'P', null, null, '', null, 0, 'N', 'N', 'N', null, 0, 'N', 0, 'Formula', 'Nao', '');
+
 `;
 
 function log(params, p2) {
@@ -148,7 +194,7 @@ function getParamsTerminal() {
   const GerarConfig = input.findIndex(
     (obj) => obj.toLowerCase() == "--tabela_config"
   );
-  if (GerarConfig > 0) {
+  if (GerarConfig >= 0) {
     CriarArquivoTabelaAuxiliar(GerarConfig);
     return false;
   }
