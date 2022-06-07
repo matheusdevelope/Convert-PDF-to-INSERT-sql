@@ -5,6 +5,7 @@
 /dist
 /.pnp
 .pnp.js
+/output_file
 /public/files/connections
 list_clients.json
 errors.json
