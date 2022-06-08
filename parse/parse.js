@@ -1,3 +1,4 @@
+const fs = require("fs");
 const GenerateInsert = require("./insert");
 
 function ApenasNumero(valor) {
@@ -69,13 +70,13 @@ function MapearCamposHExtras(ListaCampos) {
       (obj.text.toLowerCase() === "afa") | (obj.text.toLowerCase() === "montec")
   );
   Campo.y_init = ListaCampos[IndexPF].y - 0.1;
-  Campo.CPF_x_init = ListaCampos[IndexPF + 2].x - 0.5;
-  Campo.CPF_x_end = ListaCampos[IndexPF + 3].x - 0.5;
+  Campo.CPF_x_init = ListaCampos[IndexPF + 2].x - 1;
+  Campo.CPF_x_end = ListaCampos[IndexPF + 3].x - 1;
   Campo.Vlr50_x_init =
-    AchaCampoHeaderPorTexto(ListaCampos, "total", "50")?.x - 0.1; //ListaCampos[IndexPF + 5].x - 0.1;
-  Campo.Vlr50_x_end = AchaCampoHeaderPorTexto(ListaCampos, "quant")?.x - 0.1;
+    AchaCampoHeaderPorTexto(ListaCampos, "total", "50")?.x - 1;
+  Campo.Vlr50_x_end = AchaCampoHeaderPorTexto(ListaCampos, "quant")?.x - 1;
   Campo.Vlr100_x_init =
-    AchaCampoHeaderPorTexto(ListaCampos, "total", "100")?.x - 0.1;
+    AchaCampoHeaderPorTexto(ListaCampos, "total", "100")?.x - 1;
   Campo.Vlr100_x_end =
     AchaCampoHeaderPorTexto(ListaCampos, "Noturno", "", "notInvert")?.x - 1;
   Campo.VlrAdcN_x_init = AchaCampoHeaderPorTexto(ListaCampos, "Noturno")?.x - 1;
@@ -85,39 +86,29 @@ function MapearCamposHExtras(ListaCampos) {
 }
 function GeraListaFuncionariosExtras(PDF) {
   let Lista = [];
-  // let ListaCNPJ = [];
-  // let Lista50 = [];
-  // let Lista100 = [];
-  // let ListaAdcNotu = [];
   let Func = [];
 
   const Dimensions = MapearCamposHExtras(PDF);
+
   ////RETIRA CABEÇALHO , DEIXANDO APENAS AS LINHAS DE FUNCIONARIOS
   PDF = PDF.filter((obj) => obj.y >= Dimensions.y_init); //Vai comparar com a altura do registro
 
-  ///HORAS 50%
-
-  function Fteste50() {
+  function MontaLista50() {
     PDF.forEach((obj) => {
       (obj.x >= Dimensions.CPF_x_init) & (obj.x < Dimensions.CPF_x_end) &&
         Func.push(obj.text);
-      //     //ADICIONA O VALOR DAS HORAS 50%
       if (Dimensions.Vlr50_x_end > Dimensions.Vlr50_x_init) {
         if (
           (obj.x >= Dimensions.Vlr50_x_init) &
           (obj.x < Dimensions.Vlr50_x_end)
         ) {
           Func.push(ApenasNumero(obj.text || ""));
-          //Func.push("x: " + obj.x.toString());
           Func.push("Hora Extra 50%");
-          // Lista50.push(Func);
         }
       } else {
         if (obj.x >= Dimensions.Vlr50_x_init) {
           Func.push(ApenasNumero(obj.text || ""));
-          //Func.push("x: " + obj.x.toString());
           Func.push("Hora Extra 50%");
-          // Lista50.push(Func);
         }
       }
       if (Func.length === 3) {
@@ -127,13 +118,13 @@ function GeraListaFuncionariosExtras(PDF) {
         Func = [];
       }
     });
+    Func = [];
   }
 
-  function Fteste100() {
+  function MontaLista100() {
     PDF.forEach((obj) => {
       (obj.x >= Dimensions.CPF_x_init) & (obj.x < Dimensions.CPF_x_end) &&
         Func.push(obj.text);
-      // /ADICIONA O horas 100%
       if (
         Dimensions.VlrAdcN_x_init &
         (Dimensions.Vlr100_x_init < Dimensions.Vlr100_x_end)
@@ -143,16 +134,12 @@ function GeraListaFuncionariosExtras(PDF) {
           (obj.x < Dimensions.Vlr100_x_end)
         ) {
           Func.push(ApenasNumero(obj.text || ""));
-          //Func.push("x: " + obj.x.toString());
           Func.push("Hora Extra 100%");
-          //    Lista100.push(Func);
         }
       } else {
         if (obj.x >= Dimensions.Vlr100_x_init) {
           Func.push(ApenasNumero(obj.text || ""));
-          //Func.push("x: " + obj.x.toString());
           Func.push("Hora Extra 100%");
-          //   Lista100.push(Func);
         }
       }
       if (Func.length === 3) {
@@ -162,8 +149,9 @@ function GeraListaFuncionariosExtras(PDF) {
         Func = [];
       }
     });
+    Func = [];
   }
-  function FtesteAdcN() {
+  function MontaListaAdcionalNoturno() {
     PDF.forEach((obj) => {
       // /ADICIONA O CPF
       (obj.x >= Dimensions.CPF_x_init) & (obj.x < Dimensions.CPF_x_end) &&
@@ -175,16 +163,12 @@ function GeraListaFuncionariosExtras(PDF) {
           (obj.x < Dimensions.VlrAdcN_x_end)
         ) {
           Func.push(ApenasNumero(obj.text || ""));
-          // Func.push("x: " + obj.x.toString());
           Func.push("Adicional Noturno");
-          //   ListaAdcNotu.push(Func);
         }
       } else {
         if (obj.x >= Dimensions.VlrAdcN_x_init) {
           Func.push(ApenasNumero(obj.text || ""));
-          // Func.push("x: " + obj.x.toString());
           Func.push("Adicional Noturno");
-          //  ListaAdcNotu.push(Func);
         }
       }
       if (Func.length === 3) {
@@ -194,28 +178,27 @@ function GeraListaFuncionariosExtras(PDF) {
         Func = [];
       }
     });
+    Func = [];
   }
-  // FtesteCNPJ();
 
-  Dimensions.Vlr50_x_init && Fteste50();
-  Dimensions.Vlr100_x_init && Fteste100();
-  Dimensions.VlrAdcN_x_init && FtesteAdcN();
+  Dimensions.Vlr50_x_init && MontaLista50();
+  Dimensions.Vlr100_x_init && MontaLista100();
+  Dimensions.VlrAdcN_x_init && MontaListaAdcionalNoturno();
 
   ///RESETA  OBJETO FUNCIONARIO
   Func = [];
 
-  // function GravaFile(name, lista) {
-  //   fs.writeFileSync(`./output_file/file_${name}.json`, JSON.stringify(lista));
-  // }
+  function GravaFile(name, lista) {
+    fs.writeFileSync(`./output_file/file_${name}.json`, JSON.stringify(lista));
+  }
   // GravaFile("PDF", PDF);
   // GravaFile("CPF", ListaCNPJ);
   // GravaFile("50", Lista50);
   // GravaFile("100", Lista100);
   // GravaFile("adcN", ListaAdcNotu);
+  //GravaFile("Lista", Lista);
 
-  //console.log(Lista);
   return OrdenaPorCPF(RetiraLinhasComValorZero(Lista));
-  //return RetiraLinhasComValorZero(Lista);
 }
 
 /// Salario normal
