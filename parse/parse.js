@@ -314,13 +314,13 @@ function Parse(PDF_JSON, IDs) {
     if (Tipo == 1) {
       const Lista = GeraListaFuncionariosSalario(AjustaObjetos(page.Texts));
       // console.log(Lista);
-      GenerateInsert(Lista, IDs);
+      //GenerateInsert(Lista, IDs);
       return Lista;
     } else if (Tipo == 2) {
       // console.log(AjustaObjetos(page.Texts));
       const Lista = GeraListaFuncionariosExtras(AjustaObjetos(page.Texts));
       //  console.log("Extras::::", Lista);
-      GenerateInsert(Lista, IDs);
+      // GenerateInsert(Lista, IDs);
       return Lista;
     } else {
       return false;

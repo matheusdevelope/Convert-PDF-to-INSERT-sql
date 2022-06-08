@@ -5,8 +5,9 @@ const Parse = require("./parse/parse");
 const getParamsTerminal = require("./parse/inputCMD");
 const { exec } = require("child_process");
 const { join, resolve, normalize } = require("path");
+const GenerateInsert = require("./parse/insert");
 const pdfParser = new PDFParser();
-
+let ListValues = [];
 const Params = getParamsTerminal();
 function HashUnique(size) {
   let dt = new Date().getTime();
@@ -19,7 +20,33 @@ function HashUnique(size) {
   });
   return uuid;
 }
-
+function SelectPadrao(Campo) {
+  return `(select ${Campo} from Customizado_Dados_Folha_Importacao
+  WHERE Atual = 'S')`;
+}
+let path = resolve(
+  Params.output_file,
+  "insert-" +
+    HashUnique(5) +
+    "-" +
+    new Date().toLocaleDateString().replace(/[\/"]/g, "-") +
+    ".sql"
+);
+path = normalize(path);
+const IDs = {
+  CodEmpresa: SelectPadrao("CodEmpresa"),
+  CodFilial: SelectPadrao("CodFilial"),
+  CodTipoLancamento: SelectPadrao("CodTipoLancamento"),
+  CodFolha: SelectPadrao("CodFolha"),
+  Tipo: Params.tipo,
+  BaseDeDados: Params.db,
+  TabelaFunc: Params.tabelaFunc,
+  TabelaLanc: Params.tabelaLanc,
+  EstacaoTrabalho: hostname(),
+  NomeUsuario: "Administrador",
+  output_file: path,
+  servidor: Params.servidor,
+};
 function InsertON_DB(path) {
   exec(
     "sqlcmd -S " + normalize(Params.servidor) + " -i " + path,
@@ -55,40 +82,17 @@ pdfParser.on("pdfParser_dataError", (errData) =>
 );
 
 pdfParser.on("pdfParser_dataReady", (pdfData) => {
-  function SelectPadrao(Campo) {
-    return `(select ${Campo} from Customizado_Dados_Folha_Importacao
-    WHERE Atual = 'S')`;
-  }
-  let path = resolve(
-    Params.output_file,
-    "insert-" +
-      HashUnique(5) +
-      "-" +
-      new Date().toLocaleDateString().replace(/[\/"]/g, "-") +
-      ".sql"
-  );
-  path = normalize(path);
-  const IDs = {
-    CodEmpresa: SelectPadrao("CodEmpresa"),
-    CodFilial: SelectPadrao("CodFilial"),
-    CodTipoLancamento: SelectPadrao("CodTipoLancamento"),
-    CodFolha: SelectPadrao("CodFolha"),
-    Tipo: Params.tipo,
-    BaseDeDados: Params.db,
-    TabelaFunc: Params.tabelaFunc,
-    TabelaLanc: Params.tabelaLanc,
-    EstacaoTrabalho: hostname(),
-    NomeUsuario: "Administrador",
-    output_file: path,
-    servidor: Params.servidor,
-  };
-
   const retorno = Parse(pdfData, IDs);
   if (!retorno) return console.log("Houve um erro!");
+  console.log(retorno);
+  retorno.forEach((obj) => ListValues.push(obj));
+});
 
+function Finish() {
+  GenerateInsert(ListValues, IDs);
   if (Number(Params.json) === 1) {
-    if (retorno.length > 1) {
-      retorno.forEach((obj) => {
+    if (ListValues.length > 1) {
+      ListValues.forEach((obj) => {
         fs.appendFileSync(
           path.substring(0, path.length - 4) + "-JSON.txt",
           obj.toString().replaceAll(",", " , ") + "\n\n"
@@ -103,20 +107,24 @@ pdfParser.on("pdfParser_dataReady", (pdfData) => {
   }
 
   InsertON_DB(path);
-  console.log("Finalizado!");
-});
+}
 
 if (Params) {
-  exec(join(Params.path_dialog + " -o"), (error, stdout, stderr) => {
+  exec(join(Params.path_dialog + " -f"), async (error, stdout, stderr) => {
     if (stdout) {
       if (stdout.trim() === "None") console.log(new Error("Nothing selected"));
       else {
+        const ListPath = stdout.trim().split(/\r\n|\n/g);
         if (Params.executeinsertonly) {
           InsertON_DB(normalize(stdout.trim().split("\n")[0]));
         } else {
-          pdfParser
-            .loadPDF(stdout.trim().split("\n")[0])
-            .catch((o) => console.log("erro:", o));
+          for (let i = 0; i < ListPath.length; i++) {
+            const path = ListPath[i];
+            console.log(path);
+            await pdfParser.loadPDF(path).catch((o) => console.log("erro:", o));
+            console.log("ok");
+          }
+          Finish();
         }
       }
     } else if (error) {
